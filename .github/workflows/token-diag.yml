@@ -1,0 +1,26 @@
+# Diagnostic: check token permissions and try gh api
+name: Token diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check auth and permissions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== gh auth status ==="
+          gh auth status 2>&1 || true
+          echo
+          echo "=== Try gh api create pages ==="
+          gh api repos/IvoryLouseSpike/LJT-Homepage/pages -X POST -f build_type=branch -F branch=gh-pages 2>&1 || true
+          echo
+          echo "=== Repo default branch ==="
+          gh repo view IvoryLouseSpike/LJT-Homepage --json defaultBranch,hasPages 2>&1 || true
